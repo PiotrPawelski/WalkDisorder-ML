@@ -1,7 +1,8 @@
 import csv
-import numpy as np
+from sklearn.ensemble import IsolationForest
+import pickle
 
-path = r"C:\Users\Piotr\Desktop\Dataset.csv"
+path = "Dataset.csv"
 
 #Load CSV
 with open(path, 'r') as csvData:
@@ -29,18 +30,26 @@ for i in range(len(dataset)):
     diff = dataset[i][0] - time
     dataset[i][0] = diff
 
-#Slice 2D list to 3D list
+#Merge data for one step
 dataset3D = []
 tempList = []
 
 for i in range(len(dataset)):
-    if dataset[i][0] == 0 and i != 0:
-        dataset3D.append(tempList)
+    if dataset[i][0] == 0 and i != 0 and dataset[i-1][0] != 0:
+        dataset3D.append(tempList[:210])
         tempList = []
-    tempList.append(dataset[i])
+    tempList += dataset[i][1:]
 
-dataset3D.append(tempList)
+dataset3D.append(tempList[:210])
 
+#Load algorithm
+model = IsolationForest(behaviour='new', max_samples=300, contamination='auto')
 
+#Train model
+model.fit(dataset3D)
 
-print (dataset3D[:3])
+#Save model
+filename = 'WalkDisorder.model'
+
+with open(filename, "wb") as File:
+        pickle.dump(model, File)
