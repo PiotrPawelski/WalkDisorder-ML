@@ -2,8 +2,9 @@ import csv
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
 import pickle
+import collections
 
-path = "Dataset.csv"
+path = "DatasetTestDisorder.csv"
 
 #Load CSV
 with open(path, 'r') as csvData:
@@ -43,21 +44,27 @@ for i in range(len(dataset)):
 
 dataset3D.append(tempList[:210])
 
-#Define algorithms
+#Load models
+isolation = pickle.load(open("Isolation Forest.model", 'rb'))
+factor = pickle.load(open("Local Outlier Factor.model", 'rb'))
+
+#Collect models
 anomaly_algorithms = [
-    ("Isolation Forest", IsolationForest(behaviour='new',
-                                         contamination='auto')),
-    ("Local Outlier Factor", LocalOutlierFactor(
-        n_neighbors=35, contamination='auto', novelty=True))]
+    ("Isolation Forest", isolation),
+    ("Local Outlier Factor", factor)]
 
 
 for name, algorithm in anomaly_algorithms:
 
-    #Train model
-    algorithm.fit(dataset3D)
+    #Test data
+    print("\n" + name + "\n")
 
-    #Save model
-    filename = name + '.model'
+    testTable = algorithm.predict(dataset3D)
+    print(testTable)
 
-    with open(filename, "wb") as File:
-        pickle.dump(algorithm, File)
+    positives = collections.Counter(testTable)[1]
+    negatives = collections.Counter(testTable)[-1]
+    print ("\nPositives: " + str(positives))
+    print ("Negatives: " + str(negatives) + "\n")
+
+    

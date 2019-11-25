@@ -1,10 +1,11 @@
 from server import server
 from flask import request
 from flask import jsonify
-from sklearn.ensemble import IsolationForest
+from sklearn.neighbors import LocalOutlierFactor
 import pickle
 
-model = pickle.load(open("WalkDisorder.model", 'rb'))
+#Load model
+model = pickle.load(open("Local Outlier Factor.model", 'rb'))
 
 @server.route('/')
 @server.route('/check', methods=['POST'])
